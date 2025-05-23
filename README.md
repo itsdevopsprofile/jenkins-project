@@ -1,4 +1,20 @@
-# pipeline
+# install required plugins
+- stage view
+- maven integration
+- docker (first 4 plugins)
+
+
+# go to tools sections
+- add maven
+- add docker
+
+# go to credentials section
+- add dockerhub username password
+
+# create pipeline 
+
+
+# simple pipeline
 ````
 pipeline {
     agent any 
