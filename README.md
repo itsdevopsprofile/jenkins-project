@@ -95,5 +95,59 @@ pipeline {
 # final output
 ![image](https://github.com/user-attachments/assets/dc3396b9-1566-4a62-be09-3ba5d6a18051)
 
+---
+# Upload Artifacts to S3 bucket
+### required plugins
+- stage view
+- maven integration
+- aws credentials
+- s3
 
+### go to tools sections -> configure maven
+
+### go to manage jenkins-> credentials ->aws access key & secret key-> create global creds
+### note: make sure aws cli installed on server
+````
+sudo apt install unzip -y
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+````
+## create pipeline
+````
+pipeline {
+    agent any 
+    tools{
+        maven 'maven'
+    }
+    environment {
+        S3_BUCKET = 'coffeeshop.co.in'
+        AWS_REGION = 'ap-southeast-1'
+        warFile = 'target/Insurance-0.0.1-SNAPSHOT.jar'
+    }
+    
+    stages{
+        stage('code-pull'){
+            steps{
+                git branch: 'main', url: 'https://github.com/itsdevopsprofile/jenkins-project.git'
+            }
+        }
+        stage('code-build'){
+            steps{
+                sh 'mvn clean package'
+            }
+        }
+        stage('upload artifacts'){
+            steps{
+                withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'aws-cred', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+                 script {
+                    
+                     sh 'aws s3 cp ${warFile} s3://${S3_BUCKET}/artifacts/ --region ${AWS_REGION}'
+                 }
+               }
+            }
+        }
+    }
+}
+````
 
